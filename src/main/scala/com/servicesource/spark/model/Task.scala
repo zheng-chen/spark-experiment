@@ -18,7 +18,7 @@ object Task {
   
   val name = "app.tasks"
     
-  def mapper (item : (Object, BSONObject)) : CollectionModel = {
-    emptyObj.mapper(item)
+  def mapper (item : (Object, BSONObject)) : Task = {
+    emptyObj.mapper(item).asInstanceOf[Task]
   }
 }

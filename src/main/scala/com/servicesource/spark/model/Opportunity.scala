@@ -30,8 +30,8 @@ object Opportunity {
     
   val emptyObj : Opportunity = new Opportunity(null, None, None, None, None, None, None, None, None)
     
-  def mapper (item : (Object, BSONObject)) : CollectionModel = {
-    emptyObj.mapper(item)
+  def mapper (item : (Object, BSONObject)) : Opportunity = {
+    emptyObj.mapper(item).asInstanceOf[Opportunity]
   }
   
 }

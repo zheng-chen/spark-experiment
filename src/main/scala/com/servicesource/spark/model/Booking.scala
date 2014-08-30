@@ -20,8 +20,8 @@ object Booking {
     
   val emptyObj : Booking = new Booking(null, None, None)
   
-  def mapper (item : (Object, BSONObject)) : CollectionModel = {
-    emptyObj.mapper(item)
+  def mapper (item : (Object, BSONObject)) : Booking = {
+    emptyObj.mapper(item).asInstanceOf[Booking]
   }
   
 }
