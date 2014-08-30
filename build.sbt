@@ -19,7 +19,9 @@ libraryDependencies += 	"com.typesafe" % "config" % "1.0.2"
 libraryDependencies +=	"com.typesafe.play" %% "play-json" % "2.2.1"
 
 libraryDependencies ++= Seq(
-  "org.mongodb" %% "casbah" % "2.7.3"
+  "org.mongodb" %% "casbah" % "2.7.3",
+  "org.scalatest" %% "scalatest" % "1.9.2",
+  "junit" % "junit" % "4.11" % "test"
 )
 
 retrieveManaged := false
