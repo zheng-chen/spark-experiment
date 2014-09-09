@@ -14,7 +14,7 @@ case class Quote(id: String, amount: Option[Double], amountCode : Option[String]
   
   implicit val jsonReads: Reads[CollectionModel] = (
     (__ \ "_id" \ "$oid").read[String] and
-    (__ \ "amount" \ "amount" ).readOpt[Double] and
+    (__ \ "amount" \ "normalizedAmount" \ "amount").readOpt[Double] and
     (__ \ "amount" \ "code" \ "name").readOpt[String] and
     (__ \ "isBase").readOpt[Boolean] and
     (__ \ "isDraft").readOpt[Boolean] and

@@ -13,12 +13,12 @@ case class Opportunity(id: String, disp : Option[String],  amount: Option[Double
   implicit val jsonReads: Reads[CollectionModel] = (
     (__ \ "_id" \ "$oid").read[String] and
     (__ \ "displayName") .readOpt[String] and
-    (__ \ "amount" \ "amount" ).readOpt[Double] and
+    (__ \ "amount" \ "normalizedAmount" \ "amount").readOpt[Double] and
     (__ \ "amount" \ "code" \ "name").readOpt[String] and
-    (__ \ "targetAmount" \ "amount" ).readOpt[Double] and
+    (__ \ "targetAmount" \ "normalizedAmount" \ "amount").readOpt[Double] and
     (__ \ "targetAmount" \ "code" \ "name").readOpt[String] and
-    ((__ \ "relationships" \ "baseQuote" \ "targets") (0) \ "id").readOpt[String] and 
-    ((__ \ "relationships" \ "primaryQuote" \ "targets") (0) \ "id").readOpt[String] and 
+    ((__ \ "relationships" \ "baseQuote" \ "targets") (0) \ "key").readOpt[String] and 
+    ((__ \ "relationships" \ "primaryQuote" \ "targets") (0) \ "key").readOpt[String] and 
     (__ \ "result" \ "name" ).readOpt[String] 
     )(Opportunity.apply _)
     

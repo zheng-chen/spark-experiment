@@ -14,7 +14,7 @@ case class Asset(id: String, disp: String, amount : Option[Double], customer : O
     (__ \ "displayName").read[String] and 
     (__ \ "amount" \ "normalizedAmount" \ "amount").readOpt[Double] and
     ((__ \ "relationships" \ "customer" \ "targets") (0) \ "displayName").readOpt[String] and
-    ((__ \ "relationships" \ "product" \ "targets") (0) \ "id").readOpt[String]
+    ((__ \ "relationships" \ "product" \ "targets") (0) \ "key").readOpt[String]
     )(Asset.apply _)
   
 }
