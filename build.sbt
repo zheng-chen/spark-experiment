@@ -8,9 +8,11 @@ version := "1.0"
 
 scalaVersion := "2.10.4"
 
-libraryDependencies += 	"org.apache.spark" %% "spark-core" % "1.0.0"  % "provided"
+libraryDependencies += 	"org.apache.spark" %% "spark-core" % "1.0.2"  % "provided"
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.0.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.0.2" % "provided"
+
+libraryDependencies += "org.apache.spark" %% "spark-mllib" % "1.0.2" % "provided"
 
 libraryDependencies += 	"org.apache.hadoop" % "hadoop-client" % "2.2.0" % "provided"
 
