@@ -3,6 +3,8 @@ package com.servicesource.spark.model
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
+import org.apache.spark.sql._
+
 import org.bson.BSONObject
 import org.bson.BasicBSONObject
 
@@ -25,6 +27,16 @@ object Offer {
   val name = "app.offers"
 
   val emptyObj : Offer = new Offer(null, None, None, None, None)
+  
+  val tableName = "offers"
+    
+  val mongoQuery = "{\"result.name\":{$exists:true}}"
+  
+  val sqlQuery = Seq ("SELECT productDisp, result, count(id) FROM offers group by productDisp, result")
+      
+  def sqlForeachHandler (row : Row) = {
+    println("Product: " + row(0) + ", Result: " + row(1) + ", Count: " + row(2))
+  }
     
   def mapper (item : (Object, BSONObject)) : Offer = {
     emptyObj.mapper(item).asInstanceOf[Offer]

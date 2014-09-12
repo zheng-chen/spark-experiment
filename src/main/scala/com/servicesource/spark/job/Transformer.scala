@@ -13,9 +13,9 @@ import com.servicesource.spark.model._
 object Transformer {
 
   def run () {
-//    val conf = new SparkConf().setAppName("Data Transformation")
-//    val sc = new SparkContext(conf)
-    val sc = new SparkContext("local", "Testing program")
+    val conf = new SparkConf().setAppName("Data Transformation")
+    val sc = new SparkContext(conf)
+//    val sc = new SparkContext("local", "Testing program")
     
     val typeObject  =  Quote // Opportunity //Booking
     val collectionConfig = new Configuration()
@@ -29,6 +29,6 @@ object Transformer {
     
     transformed.foreach(println)
     
-//    transformed.saveAsTextFile("hdfs:///transform."+Quote.name)
+//    transformed.saveAsTextFile("hdfs:///transform."+typeObject.name)
   }
 }

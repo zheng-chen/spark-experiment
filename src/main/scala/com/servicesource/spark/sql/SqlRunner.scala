@@ -14,36 +14,37 @@ import com.servicesource.spark.Settings
 object SqlRunner {
 
    def main(args: Array[String]) {
-     val sc = new SparkContext("local", "Testing program")
+     val conf = new SparkConf().setAppName("Spark SQL Runner")
+     val sc = new SparkContext(conf)
+     
+     //val sc = new SparkContext("local", "Testing program")
      val config = new Configuration()
-     config.set("mongo.input.uri", Settings.getDbConnection(Task.name))
-     val tasksRdd = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat], 
+     
+     val modelObj = Offer
+     
+     config.set("mongo.input.uri", Settings.getDbConnection(modelObj.name))
+     
+     if (modelObj.mongoQuery!=null) {
+       config.set("mongo.input.query", modelObj.mongoQuery)
+     }
+     
+     val collRdd = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat], 
          classOf[Object], classOf[BSONObject])
          
      // sql conversion
      val sqlContext = new org.apache.spark.sql.SQLContext(sc)
      import sqlContext._
      
-     val task = tasksRdd map ( Task.mapper )
-     task.cache
-     task.registerAsTable("tasks")
+     val mappedColl = collRdd map ( Offer.mapper )
+     mappedColl.cache
+     mappedColl.registerAsTable(modelObj.tableName)
      
-     val oneTask = sqlContext.sql("SELECT id, disp FROM tasks WHERE id = \"51a67c7572338ce8f0003ef6\"")
-     oneTask.map(t => "ID: " + t(0) + ", DisplayName: " + t(1)).collect().foreach(println)
+     for (query <- modelObj.sqlQuery) {
+       sqlContext.sql(query).foreach(Offer.sqlForeachHandler)
+     }
      
-     val multiplTasks = sqlContext.sql("SELECT id, disp FROM tasks WHERE disp LIKE \"%TASK%\"")
-     multiplTasks.map(t => "ID: " + t(0) + ", DisplayName: " + t(1)).collect().foreach(println)
      
-//     val config = new Configuration()
-//     config.set("mongo.input.uri", Settings.getDbConnection(Asset.name))
-//     val tasksRdd = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat], 
-//         classOf[Object], classOf[BSONObject])
-//         
-//     // sql conversion
-//     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
-//     import sqlContext._
-//     
-//     val task = tasksRdd map ( Asset.mapper )
+//     val task = collRdd map ( Asset.mapper )
 //     task.cache
 //     task.registerAsTable("assets")
 //     
