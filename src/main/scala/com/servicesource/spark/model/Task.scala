@@ -22,7 +22,7 @@ object Task {
     
   val tableName = "tasks"
     
-  val mongoQuery = null
+  val mongoQuery : String = null
   
   val sqlQuery = Seq ("SELECT id, disp FROM tasks WHERE id = \"51a67c7572338ce8f0003ef6\"", 
       "SELECT id, disp FROM tasks WHERE disp LIKE \"%TASK%\"")
