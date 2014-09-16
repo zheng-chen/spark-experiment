@@ -17,12 +17,14 @@ object SqlRunner {
      val conf = new SparkConf().setAppName("Spark SQL Runner")
      val sc = new SparkContext(conf)
      
-     //val sc = new SparkContext("local", "Testing program")
+//     val sc = new SparkContext("local", "Testing program")
      val config = new Configuration()
      
      val modelObj = Offer
      
      config.set("mongo.input.uri", Settings.getDbConnection(modelObj.name))
+     config.set("mongo.input.notimeout", "true");
+     config.set("mongo.splitter.class", "com.servicesource.spark.mongo.CustomCollectionSplitter")
      
      if (modelObj.mongoQuery!=null) {
        config.set("mongo.input.query", modelObj.mongoQuery)
