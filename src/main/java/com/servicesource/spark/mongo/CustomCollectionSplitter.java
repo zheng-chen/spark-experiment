@@ -28,7 +28,7 @@ public class CustomCollectionSplitter extends MongoCollectionSplitter {
 	private DBObject _IDOBJ = BasicDBObjectBuilder.start().add(_ID, 1).get();
 
 	// TODO: make it configurable
-	private int skip_size = 3000;
+	private int chunk_size = 3000;
 
 	public CustomCollectionSplitter() {
 	}
@@ -78,9 +78,12 @@ public class CustomCollectionSplitter extends MongoCollectionSplitter {
 			rangeObj.put("$gte", previousId);
 			newQuery.put(_ID, rangeObj);
 		}
+		
+		//TODO: customize this ...
 		DBObject hint = BasicDBObjectBuilder.start().add("result.name", 1).add(_ID, 1).get();
+		
 		return inputCollection.find(newQuery, _IDOBJ).sort(_IDOBJ).hint(hint)
-				.skip(skip_size).limit(1);
+				.skip(chunk_size).limit(1);
 	}
 
 	private MongoInputSplit createSplit(ObjectId from, ObjectId to,
