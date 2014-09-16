@@ -28,7 +28,7 @@ public class CustomCollectionSplitter extends MongoCollectionSplitter {
 	private DBObject _IDOBJ = BasicDBObjectBuilder.start().add(_ID, 1).get();
 
 	// TODO: make it configurable
-	private int skip_size = 50; // 5000;
+	private int skip_size = 3000;
 
 	public CustomCollectionSplitter() {
 	}
@@ -66,7 +66,7 @@ public class CustomCollectionSplitter extends MongoCollectionSplitter {
 	private void addSplit(ObjectId from, ObjectId to, DBObject query,
 			List<InputSplit> splits) throws SplitFailedException {
 		MongoInputSplit split = createSplit(from, to, query);
-		LOG.info("Generated split: " + split);
+		LOG.info("Generated split " + splits.size() + ":" + split);
 		splits.add(split);
 	}
 
@@ -78,7 +78,8 @@ public class CustomCollectionSplitter extends MongoCollectionSplitter {
 			rangeObj.put("$gte", previousId);
 			newQuery.put(_ID, rangeObj);
 		}
-		return inputCollection.find(newQuery, _IDOBJ).sort(_IDOBJ)
+		DBObject hint = BasicDBObjectBuilder.start().add("result.name", 1).add(_ID, 1).get();
+		return inputCollection.find(newQuery, _IDOBJ).sort(_IDOBJ).hint(hint)
 				.skip(skip_size).limit(1);
 	}
 
@@ -105,6 +106,7 @@ public class CustomCollectionSplitter extends MongoCollectionSplitter {
 		MongoInputSplit split = new MongoInputSplit();
 		split.setQuery(splitQuery);
 		split.setInputURI(MongoConfigUtil.getInputURI(conf));
+		split.setNoTimeout(true);
 		return split;
 	}
 
