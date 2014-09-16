@@ -5,6 +5,9 @@ import play.api.libs.functional.syntax._
 
 import org.apache.spark.sql._
 
+import com.mongodb.casbah.Imports._
+import com.servicesource.spark.Settings
+
 import org.bson.BSONObject
 import org.bson.BasicBSONObject
 
@@ -28,14 +31,36 @@ object Offer {
 
   val emptyObj : Offer = new Offer(null, None, None, None, None)
   
+  val offerByProdCol = MongoConnection()(Settings.get("cubeDbName"))("spark.offers_by_product")
+  
   val tableName = "offers"
     
-  val mongoQuery = "{\"result.name\":\"lose\"}"
+  val mongoQuery = "{\"result.name\":\"houseAccount\"}"
   
   val sqlQuery = Seq ("SELECT productId, result, count(id) FROM offers group by productId, result")
       
   def sqlForeachHandler (row : Row) = {
-    println("Product: " + row(0) + ", Result: " + row(1) + ", Count: " + row(2))
+//    println("Product: " + row(0) + ", Result: " + row(1) + ", Count: " + row(2))
+    val existingEntry = offerByProdCol.findOne(MongoDBObject("product" -> row(0)))
+    val res = row(1).toString
+    
+    existingEntry match {
+      case Some(entry) => {
+        val results = entry.as[DBObject] ("results")
+        if (results.get(res)==null) {
+          results.put(res, row.getLong(2).toInt)
+        }
+        val q = MongoDBObject("_id" -> entry.as[DBObject]("_id"))
+        val update = $set("results"->results)
+        offerByProdCol.update(q, update)
+      }
+      case None => {
+        val input = MongoDBObject.newBuilder
+        input +=  "product" -> row(0)
+        input += "results" -> DBObject(res -> row.getLong(2).toInt) 
+        offerByProdCol += input.result
+      }
+    }
   }
     
   def mapper (item : (Object, BSONObject)) : Offer = {
