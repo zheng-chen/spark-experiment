@@ -21,8 +21,16 @@ abstract class CollectionModel extends Product {
   implicit val jsonReads: Reads[CollectionModel]
   
   def mapper (item : (Object, BSONObject)) : CollectionModel = {
-    if (item!=null) {
-	    val json = Json.parse(item._2.toString)
+    if (item!=null && item._2!=null) {
+	    mapper(item._2.toString())
+    } else {
+      null
+    }
+  }
+  
+  def mapper (line : String) : CollectionModel = {
+    if (line!=null) {
+      val json = Json.parse(line)
 	    json.validate[CollectionModel] match {
 	      case s: JsSuccess[CollectionModel] => s.get
 	      case e: JsError => {
