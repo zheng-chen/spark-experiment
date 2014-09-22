@@ -1,8 +1,8 @@
 var threshold = 10,
-    by = 'product',
+    by = 'customer',
     coll = 'spark.offers_by_'+by, 
     appDb = db.getSiblingDB("appdata"),
-    appColl = 'app.products', 
+    appColl = 'core.organizations', 
     index = 0;
 
 var cursor = db[coll].find();
@@ -35,9 +35,11 @@ while(cursor.hasNext()){
 	    }
 	}
 	var displayName = '';
-	var appCur = appDb[appColl].findOne({_id:ObjectId(rec[by])}, {displayName:1});
-	if (appCur) {
-		displayName = appCur.displayName
+	if (rec[by]) {
+		var appCur = appDb[appColl].findOne({_id:ObjectId(rec[by])}, {displayName:1});
+		if (appCur) {
+			displayName = appCur.displayName
+		}
 	}
 	
 	db[coll].update({_id:rec._id}, {$set: {scale: scale, displayName: displayName}});

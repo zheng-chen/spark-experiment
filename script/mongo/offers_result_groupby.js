@@ -1,10 +1,10 @@
-var res = "win", index = 0, 
+var res = "win", index = 0, by='customer',
 	cubedb = db.getSiblingDB("cubedata"),
-	collName = 'spark.offers_by_product';
+	collName = 'spark.offers_by_'+by;
 
 db.app.offers.aggregate( [
   { $match : {'result.name' : res} }, 
-  { $group : { _id : "$relationships.product.targets.key",count : { $sum : 1 } } }
+  { $group : { _id : "$relationships."+by+".targets.key",count : { $sum : 1 } } }
   ], 
   {cursor: { batchSize: 50 }}).forEach(function (entry) {
   if (!entry || !entry._id || !entry._id[0])
