@@ -18,7 +18,7 @@ import org.bson.BasicBSONObject
 import com.servicesource.spark.model._
 import com.servicesource.spark.Settings
 
-object OffersClassification {
+object OffersClassificationLocal {
 
   def main(args: Array[String]) {
     val sc = new SparkContext("local", "Testing program")

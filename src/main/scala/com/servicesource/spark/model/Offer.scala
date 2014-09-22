@@ -31,17 +31,20 @@ object Offer {
 
   val emptyObj : Offer = new Offer(null, None, None, None, None)
   
-  val offerByProdCol = MongoConnection()(Settings.get("cubeDbName"))("spark.offers_by_product")
+//  val offerByCol = MongoConnection()(Settings.get("cubeDbName"))("spark.offers_by_product")
+  val offerByCol = MongoConnection()(Settings.get("cubeDbName"))("spark.offers_by_customer")
   
   val tableName = "offers"
     
-  val mongoQuery = "{\"result.name\":\"houseAccount\"}"
+  val mongoQuery = "{\"result.name\":{$exists:true}}"
   
-  val sqlQuery = Seq ("SELECT productId, result, count(id) FROM offers group by productId, result")
+//  val sqlQuery = Seq ("SELECT productId, result, count(id) FROM offers group by productId, result")
+  val sqlQuery = Seq ("SELECT customerId, result, count(id) FROM offers group by customerId, result")
       
   def sqlForeachHandler (row : Row) = {
 //    println("Product: " + row(0) + ", Result: " + row(1) + ", Count: " + row(2))
-    val existingEntry = offerByProdCol.findOne(MongoDBObject("product" -> row(0)))
+    //val existingEntry = offerByCol.findOne(MongoDBObject("product" -> row(0)))
+    val existingEntry = offerByCol.findOne(MongoDBObject("customer" -> row(0)))
     val res = row(1).toString
     
     existingEntry match {
@@ -52,19 +55,24 @@ object Offer {
         }
         val q = MongoDBObject("_id" -> entry.as[DBObject]("_id"))
         val update = $set("results"->results)
-        offerByProdCol.update(q, update)
+        offerByCol.update(q, update)
       }
       case None => {
         val input = MongoDBObject.newBuilder
-        input +=  "product" -> row(0)
+//        input +=  "product" -> row(0)
+        input +=  "customer" -> row(0)
         input += "results" -> DBObject(res -> row.getLong(2).toInt) 
-        offerByProdCol += input.result
+        offerByCol += input.result
       }
     }
   }
     
   def mapper (item : (Object, BSONObject)) : Offer = {
     emptyObj.mapper(item).asInstanceOf[Offer]
+  }
+  
+  def mapper (line : String) : Offer = {
+    emptyObj.mapper(line).asInstanceOf[Offer]
   }
   
 }
