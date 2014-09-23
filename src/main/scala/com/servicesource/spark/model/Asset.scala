@@ -13,7 +13,7 @@ case class Asset(id: String, disp: String, amount : Option[Double], customer : O
     (__ \ "_id" \ "$oid").read[String] and
     (__ \ "displayName").read[String] and 
     (__ \ "amount" \ "normalizedAmount" \ "amount").readOpt[Double] and
-    ((__ \ "relationships" \ "customer" \ "targets") (0) \ "displayName").readOpt[String] and
+    ((__ \ "relationships" \ "customer" \ "targets") (0) \ "key").readOpt[String] and
     ((__ \ "relationships" \ "product" \ "targets") (0) \ "key").readOpt[String]
     )(Asset.apply _)
   
@@ -23,6 +23,8 @@ object Asset {
   
   val name = "app.assets"
   val emptyObj : Asset = new Asset(null, null, None, None, None)
+  
+  val sqlQuery = Seq ("SELECT count(id),product FROM assets WHERE disp LIKE \"%Remedy%\" group by product")
     
   def mapper (item : (Object, BSONObject)) : Asset = {
     emptyObj.mapper(item).asInstanceOf[Asset]

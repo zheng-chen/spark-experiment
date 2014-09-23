@@ -22,7 +22,7 @@ object OffersClassification {
 
   def main(args: Array[String]) {
 
-    val conf = new SparkConf().setAppName("Spark SQL Runner")
+    val conf = new SparkConf().setAppName("Offers Classification")
     val sc = new SparkContext(conf)
     //    val sc = new SparkContext("local", "Testing program")
     //    val config = new Configuration()

@@ -79,10 +79,10 @@ public class CustomCollectionSplitter extends MongoCollectionSplitter {
 			newQuery.put(_ID, rangeObj);
 		}
 		
-		//TODO: customize this ...
-		DBObject hint = BasicDBObjectBuilder.start().add("result.name", 1).add(_ID, 1).get();
+		//TODO: customize hint ...
+//		DBObject hint = BasicDBObjectBuilder.start().add("result.name", 1).add(_ID, 1).get();
 		
-		return inputCollection.find(newQuery, _IDOBJ).sort(_IDOBJ).hint(hint)
+		return inputCollection.find(newQuery, _IDOBJ).sort(_IDOBJ) //.hint(hint)
 				.skip(chunk_size).limit(1);
 	}
 

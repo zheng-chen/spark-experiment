@@ -24,8 +24,7 @@ object Task {
     
   val mongoQuery : String = null
   
-  val sqlQuery = Seq ("SELECT id, disp FROM tasks WHERE id = \"51a67c7572338ce8f0003ef6\"", 
-      "SELECT id, disp FROM tasks WHERE disp LIKE \"%TASK%\"")
+  val sqlQuery = Seq ("SELECT id, disp FROM tasks WHERE disp LIKE \"%TASK%\"")
       
   def sqlForeachHandler (row : Row) = {
     println("ID: " + row(0) + ", DisplayName: " + row(1))
