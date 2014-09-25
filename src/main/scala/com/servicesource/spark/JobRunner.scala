@@ -6,7 +6,7 @@ object JobRunner {
 
   def main(args: Array[String]) {
     
-//    FindMissingLinks.run
-    Transformer.run
+    FindMissingLinks.run
+//    Transformer.run
   }
 }
