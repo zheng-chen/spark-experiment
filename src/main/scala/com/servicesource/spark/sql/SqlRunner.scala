@@ -19,13 +19,14 @@ import spark.jobserver._
 import com.typesafe.config.{ Config, ConfigFactory }
 
 object SqlRunner extends SparkJob with NamedRddSupport {
-
+  
   def main(args: Array[String]) {
     val sc = new SparkContext("local", "Testing program")
-    loadFromMongo(sc)
+    val context = new SQLContext(sc)
+    loadFromMongo(sc, context)
   }
 
-  private def loadFromMongo(sc:SparkContext): RDD[Row] = {
+  private def loadFromMongo(sc:SparkContext, sqlContext: SQLContext ): RDD[Row] = {
     val modelObj = Task
 
     val config = new Configuration()
@@ -39,10 +40,8 @@ object SqlRunner extends SparkJob with NamedRddSupport {
 
     val collRdd = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat],
       classOf[Object], classOf[BSONObject])
-
-    val sqlContext: SQLContext = new SQLContext(sc)
-  	import sqlContext._
   	
+  	import sqlContext._
     val mappedColl = collRdd map (Task.mapper)
     mappedColl.cache
     mappedColl.registerAsTable(modelObj.tableName)
@@ -52,16 +51,34 @@ object SqlRunner extends SparkJob with NamedRddSupport {
     mappedColl
   }
   
-  private def loadFromS3(sc: SparkContext): (SQLContext, RDD[Row]) = {
-    val modelObj = Offer
-    val collRdd = sc.textFile("s3n://ssi-spark/offers_result_ml/export_sample")
+  private def loadFromS3(sc:SparkContext, sqlContext: SQLContext): RDD[Row] = {
+    val offerObj = Offer
+    val offerRdd = sc.textFile("s3n://ssi-spark/offers_result_ml/export_sample")
 
-    val sqlContext: SQLContext = new SQLContext(sc)
-  	import sqlContext._
-    val mappedColl = collRdd map (Offer.mapper)
-    mappedColl.cache
-    mappedColl.registerAsTable(modelObj.tableName)
-    (sqlContext, mappedColl)
+    import sqlContext._
+    
+    val offerCol = offerRdd map (Offer.mapper)
+    offerCol.registerAsTable(offerObj.tableName)
+    cacheTable(offerObj.tableName)
+    
+    loadJoinFromS3(sc, sqlContext)
+    
+    offerCol
+  }
+  
+  private def loadJoinFromS3(sc:SparkContext, sqlContext: SQLContext): RDD[Row] = {
+    
+    val prodObj = AppProduct
+    val prodRdd = sc.textFile("s3n://ssi-spark/offers_result_ml/product_sample")
+
+    import sqlContext._
+    
+    val prodCol = prodRdd map (AppProduct.mapper)
+    
+    prodCol.registerAsTable(prodObj.tableName)
+    cacheTable(prodObj.tableName)
+    
+    prodCol
     
   }
 
@@ -73,17 +90,19 @@ object SqlRunner extends SparkJob with NamedRddSupport {
 
   override def runJob(sc: SparkContext, config: Config): Any = {
 
-//    var rdd = this.namedRdds.get[Row]("cachedRdd").getOrElse(null)
-//
-//    if (rdd == null) {
-//      
-//      this.namedRdds.update("cachedRdd", rdd)
-//    }
+    var rdd = this.namedRdds.get[Row]("cachedRdd").getOrElse(null)   
+    val context : SQLContext = if (rdd==null) new SQLContext(sc) else rdd.asInstanceOf[SchemaRDD].sqlContext
     
-    val (context, rdd) = loadFromS3(sc)
-
-    val sql = config.getString("input.sql")
-    context.sql(sql).collect
-
+    if (rdd == null) { 
+      rdd = loadFromS3(sc, context)
+      this.namedRdds.update("cachedRdd", rdd)
+    } 
+    
+    import context._
+    
+    val query = config.getString("input.sql")
+//    val joinRdd = loadJoinFromS3(sc, context)
+    sql(query).collect
+    
   }
 }
